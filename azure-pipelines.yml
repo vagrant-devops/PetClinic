@@ -1,0 +1,30 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: |
+    wget https://aka.ms/download-jdk/microsoft-jdk-17.0.1.12.1-linux-x64.tar.gz
+    sudo tar -xvzf microsoft-jdk-17.0.1.12.1-linux-x64.tar.gz --directory /usr/lib/jvm
+    sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/microsoft-17.0.1+12/bin/java 100
+    sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/microsoft-17.0.1+12/bin/javac 100
+    java -version
+  displayName: 'Install Java 17'
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'package'
